@@ -1,0 +1,51 @@
+Usando atomic<queues>
+
+int capacidad = 20
+atomic<int> cantidadActual = 0;
+atomic<queue> sofa;
+atomic<queue> parados;
+semaphore sofa_sem = 0;
+
+clientes{
+    semaphore s = 0;
+    If(cantidadActual.getAndInc() <= capacidad){
+        //Puedo entrar
+        If(cantidadActual > 4){ //Me tengo que quedar parado
+            parados.enqueue(s);  
+            while(parados.first() != s){
+                //busy waiting hasta que me toque sentarme
+            }
+            sofa_sem.wait()
+        } 
+    }else{
+        return 0;               //Me voy
+    }
+    sofa.enqueue(s);
+    while(sofa.first() != s){
+        //Busy waiting en el sofa
+    }
+    s.wait();                //soy el primero y espero a que me llamen 
+    if(cantidadActual > 4)
+        sofa_sem.signal()   //Alguien se puede sentar solo si hay gente esperando!
+    sentarmeSilla()
+    pagar.wait();           // espero a pagar
+    cantidadActual.getAndDec()
+    return 0;
+}
+
+
+barbero(){
+    while(true){
+        If(cantidadActual == 0){
+            dormir();
+        }else{
+            semaforo_cliente = sofa.first(); <- corresponde al s.wait
+            sofa.dequeue();
+            parados.dequeue();
+            semaforo_cliente.signal()
+            cortarPelo()
+            pagar.signal()
+            cobrar()
+        }
+    }
+}

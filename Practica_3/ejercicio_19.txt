@@ -1,0 +1,39 @@
+EJERCICIO 19
+EL CRUCERO DE NOEL
+En el crucero queremos guardar parejas de distintas especies. Hay una puerta por cada especie, los animales forman fila en cada puerta
+en dos colas, una por sexo. Queremos que entren en parejas. 
+Hacer el pseudocodigo P(i,sexo).
+
+//suponiendo que hay N especies que ya conozco
+
+queue<pid_t> machosEspecie[N]
+queue<pid_t> hembrasEspecie[N]
+
+semaphore hayHembra[N] = 0
+semaphore hayMacho[N]  = 0
+
+
+
+P(i,sexo){
+    if(sexo == macho){
+        machosEspecie[i].enqueue(getpid())
+        while(getpid != machosEspecie[i].first()){
+            //Busy waiting
+        } 
+        //soy el primero
+        hayMacho[i].signal()
+        machosEspecie[i].dequeue()
+        hayHembra[i].wait()
+    }else{
+        hembrasEspecie[i].enqueue(getpid())
+        hayHembra[i].signal()
+        while(getpid() != hembrasEspecie[i].first()){
+            //Busy waiting
+        }
+        //soy la primera
+        hayHembra[i].signal()
+        hembrasEspecie[i].dequeue()
+        hayMacho[i].wait()
+    }
+    entrar(i)
+}

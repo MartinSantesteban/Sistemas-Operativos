@@ -1,0 +1,26 @@
+[EJERCICIO 20]
+Una tribu cena de una gran cacerola que puede contener hasta M porciones de misionero asado.
+Cuando un antropofago quiere comer se sirve de la cacerola, a menos que esta esté vacía.
+Si esta está vacía, se despierta al cocinero y se espera a que rellene la cacerola.
+
+semaphore cocinero = 0;
+semaphore cacerola = 0;
+atomic<queue> cacerola; // la cacerola puede se cualquier cosa, no se cual es la idea.
+
+antropofago(){
+    while(true){
+        if(cacerola.empty()){
+            cocinero.signal();
+            cacerola.wait();
+        }else{
+            tomar_porcion();
+            comer();
+        }
+    }
+}
+
+cocinero(){
+    cocinero.wait()
+    cocinar();
+    cacerola.signal()
+}

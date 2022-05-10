@@ -1,0 +1,35 @@
+Se tiene un único lavarropas que puede lavar 10 prendas y para aprovechar el ajbon nunca es encendido hasta estar totalmente lleno.
+Suponer que se tiene un proceso L para simular el lavarropas y un conjunto de procesos P(i) para representar cada prenda.
+Escribir el pseudocodigo que resuelve este problema de sincronizacion teniendo en cuenta los siguientes requisitos:
+--> Un proceso L invoca estoyListo() para indicar que la ropa puede ser cargada.
+--> P(i) puede invocar entroAlLavarropas() una vez que esta listo, dos procesos NO pueden entrar al mismo tiempo.
+--> Se invoca lavar() una vez lleno L. Luego puede invocar puedenDescargarme()
+--> Las prendas invocan saquenmeDeAqui una vez terminado todo, las prendas si pueden salir todas a la vez.
+
+semaphore estoyListo = 0;
+semaphore entrar = 1;
+semaphore lavado = 0;
+atomic<int> conteo = 0;
+
+proceso Lavarropas(){
+    estoyListo.signal() 
+    while(conteo != 10){
+        // Busy waiting
+    }
+    lavar()
+    puedenDescargarme()
+    lavado.signal()
+
+}
+
+proceso Prenda(){
+    estoyListo.wait()
+    entrar.wait()
+    entroAlLavarropas()
+    conteo.getAndInc()
+    entrar.signal()
+    lavado.wait()
+    lavado.signal()
+    saquenmeDeAqui()
+}
+    
