@@ -1,0 +1,59 @@
+EJERCICIO 21    
+Somos los encargados de llenar heladeras de cerveza.
+Cada heladera tiene capacidad para 15 botellas de un litro + 1 porrones
+Las heladeras hay que llenarlas en orden -> Hasta no llenar una heladera no pasamos a la siguiente
+Hay que enchufarlas antes de usarlas.
+Una vez llena hay que apretar el boton de enfriado rapido.
+Dos procesos: Heladera y cerveza.
+Las operaciones disponibles en los procesos heladera son: 
+    - EnchufarHeladera
+    - ArbirHeladera
+    - CerrarHeladera
+    - EnfriadoRapido
+Procesos cerveza:
+    - LlegarAlBar
+    - MeMetenEnHeladera // De a una cerveza a la vez
+El proceso ceveza puede terminar solo una vez dentro de la heladera.
+
+semaphore enchufar = 1;
+atomic<int> catidad_porrones = 0;
+atomic<int> cantidad_botellas = 0;
+atomic<bool> enchufadaB = false;         // Solo en el primer estado de todos es false
+
+
+H(i){
+    enchufar.wait() //si hay una heladera enchufada espero.
+    EnchufarHeladera()
+    enchufadaB = true;
+    enchufada.signal()
+    while(true){
+        abrir.wait()
+        AbrirHeladera()
+        cerrar.wait()
+        CerrarHeladera()
+        if(cantidad_porron == 10 && cantidad_botellas == 15){ //si se lleno desenchufo 
+            EnfriadoRapido()
+            enchufar.signal()
+            break
+        }
+    }
+}
+
+C(i, tipo){        // tipo dice si es porron o litro
+    LlegarAlBar()
+    if(!enchufadaB){
+        enchufada.wait() //SI llego y no hay heladera en uso 
+    }
+    // aca poner un enchufar.wait para el porron 11
+
+    if(tipo = porron){
+        cantidad_porron.getAndInc()
+    }else{
+        cantidad_litro.getAndInc()
+    }
+    mtx.wait()
+    abrir.signal()
+    MeMetenEnHeladera() //Las cervezas se meten de a una
+    cerrar.signal()
+    mtx.signal()
+}
