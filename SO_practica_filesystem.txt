@@ -1,0 +1,53 @@
+CLASE PRACTICA SISTEMA DE ARCHIVOS
+
+Un archivo es un conjunto de datos relacionados. Se incluyen datos y metadatos. Para el usuario, conforma la unidad minima de almacenamiento secundario.
+Un filesystem nos premite administrar y ordenar los archivos dentro de un medio de almacenamiento.
+Las lecturas y escrituras a un medio de almacenamiento se hacen en unidades llamadas bloques,
+Estos bloques son logicos, aunque tienen que ver con el HW.
+Cada archivo ocupa una cantidad entera de bloques, esto provoca fragmentacion interna.
+
+Uno de los problemas que debe resolver el filesystem es como asignar los bloques a diferentes archivos.
+Estrategias:
+    - Ir colocando cada archivo en una secuencia de bloques contiguos. -> Problema: Fragmentacion externa
+     Fragrmentacion interna: Cuando yo le asigno los bloques que necesita un archivo, le voy a dar una catnidad entera. Si no ocupa una catnidad entera, le voy a haber dado un bloque entero, dejando un pedacito sin utilizar.
+
+    - Una alternativa es guardar para cada bloque del archivo la informacion: FAT.
+
+    [Tabla de asignaciones, o FAT]
+    Una tabla de entrada para cada bloque del disco, donde se indica segun el caso:
+        * Cual es el bloque siguiente del archivo al cual pertenece el bloque. <- No tienen porque ser bloques seceunciales.
+        * Si el bloque es el ultimo de un archivo
+        * O si el bloque esta vacio.
+
+        Desventajas:
+            - Si el archivo no es secuencial salto de un lugar al otro en el disco
+            - Si tengo un disco muy grande, muy lleno, la tabla FAT se agranda, incluso va a ser muy pesada. <- Desperdicia recursos, tengo que tener toda la tabla cargada en memoria.
+
+    Alternativa: Mantener todos los bloques indexados de todos los archivos.
+        - En UNIX estas estructuras se llaman inodos
+        - Cada inodo tiene punteros a los bloques del archivo.
+        --> Es deseable que los inodos tengan tamaño fijo
+        --> Ademas los primeros bloques de un archivo suelen ser accedidos con mas frecuencia.
+        Los inodos tienen indireccion simple, apunta a un bloque con una lista de punteros que apuntan a bloques de datos. (puntero a punteros de datos).
+        Si eso no alcanza, existe la indireccion doble, un puntero a bloque de punteros a bloques de punteros a bloques.
+        Sino está la triple. La idea es la misma.
+        Así puedo direccionar a archivos muy grandes.
+        Los inodos ademas tienen metadatos <- propiedades, permisos del archivo.
+
+
+-> Donde estan los inodos?
+    Los bloques de disco estan divididos en grupos contiguos. <- Van a tener infromacion de los inodos como bitmaps, un super bloque.
+    Cada grupo contiene bloques de datos y bloques de inodos.
+    Los inodos estan repartidos a lo largo del disco, y no tengo un bloque por inodo: En un bloque van a entrar varios inodos.         <- Esta estructura la maneja ext2
+    Los directorios tambien son archivos, consisten en una tabla con una entrada por cada archivo.
+
+    En FAT los directorios indican el indice del primer bloqued e cada archivo. -> Contienen todos los metadatos de los archivos ;; El directorio root tiene un bloque distinguido. <- No tiene inodos
+
+    En ext2 los directorios solo tienen nombre y su inodo. No hay metadatos, viven en el inodo. Los drectorios tambien son archivos, asiq tienen su inodo. Root vuelve a estar distinguido, asi de ahi puedo recorrer todos los
+    directorios. ( todos los ext manejan inodos )
+    Que ventaja tiene no tener un nombre attached a un inodo? Hardlink
+        Dos directorios distintos pueden tener sus nombres pero referenciar al mismo inodo. Por eso en los metadadatos figura el numero de referencias a si mismo.
+        Tambien hay enlaces simbolicos: Un directorio tiene una ref a un inodo A. Otro dir tiene una referencia a un inodo B. Pero B apunta a los bloques del primer directorio, que apunta a A.
+        Cuando esto sucede, el hyper_link_count de A se mantiene en 1.
+
+
