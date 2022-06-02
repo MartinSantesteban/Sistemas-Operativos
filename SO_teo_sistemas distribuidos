@@ -1,0 +1,115 @@
+NOTAS CLASE TEORICA SISTEMAS OPERATIVOS: SISTEMAS DISTRIBUIDOS               <- Pretende ser una introduccion a los sistemas distribuoidos.
+
+ - Conjunto de recursos conectados que itneractuan, por ejemplo varios procesadores que comparten memoria.
+ - NUMA: Non uniform memory access: Tenes varios procesadores, cada uno tiene su memoria, hay un bus compartido.
+ - UMA: Todos los procesadores comparten la misma memoria.
+
+Fortalezas:
+    - Paralelismo
+    - Replicacion: Si dos procesadores hacen lo mismo y uno se rompe, tengo el mismo trabajo en el otro.
+    - Descentralizacion
+
+Desventaja:
+    Caracteristica que divide a sistemas paralelos de los distruibuidos
+        - No comparten almacenamiento primario, memoria.
+        - Se encuentran en espacios fisicos distintos.
+        -- Los sistemas distruibuidos NO suelen compartir clock
+        -- En el entorno distibuido es mucho mas complejo mantener la coherencia.
+        -- Como computa uno cuando no tiene memoria compartida? -> ARQUITECTURA DE SOFTWARE
+
+ARQUITECTURA DE SOFTWARE
+    Idea de la conexion remota: Conectarse remotamente a otra maquina, comando ssh. Aca ya hay una idea de sistemas distribuidos, una computadora controla y la otra hace
+
+RPC: Mecanismo que les permite a los programas hacer procedure calls de manera remota.
+     Involucra bibliotecas que ocultan del programador los detalles de comunicacion y le permiten
+     ademas enviar los datos de un lugar a otro de la red.
+
+    Idea: Una computadora para pedir ayuda para el computo de un programa, tiene un modulo que permite agarrar el programa y mandarselo a la otra computadora para que lo ejecute ella eficientemente. Se comunican por la red. (Procedure calls)
+    El programa corre en la memoria del equipo remoto.
+    Se levanta un servidor para que el programa de E1 pase informacion a ejecutar en la cpu E2.
+    Este es un mecanismo sincronico.
+    Ambos equipos procesan, pero no a la vez, el primero E1 se queda bloqueado esperando a que E2 devuelva un valor de retorno.
+    La cooperaciontiene la forma de solicitar servicios a otros.
+
+Comunicacion asincronica
+    - RPC asincronico: Introduce callbacks, que introduce Future[data_type].
+    - Pasaje de mensajes(send/receive), Message Passing Interface (MPI) para C/C++.
+    -- No supone que haya nada compartido, excepto un canal de comunicacion.
+    -- Problemas a considerar:
+        Tengo que manejar la codificacion, decodificacion de mensajes.
+        Si hago comunicacion asincronica, tengo que dejar de atender para procesar el traspaso de
+        mensajes.
+        La comunicacion es lenta.
+        El canal puede perder eventualmente mensajes.
+        Eventualmente cada envio puede tener un costo economico para cada mensaje que se transmite
+        por el canal.
+        Es tan caro el acceso a disco que llega un punto en el que la nocion de complejidad cambia
+        a accesos a disco.
+        Eventualmente los canales se pueden llenar y se pierden paquetes o se bloquea.
+
+En entornos distribuidos no hay TestAndSet, ya que lo implementa el HW.
+-> No tengo forma de parar todos los procesadores a que se sincronicen.
+
+Enfoque: Una maquina hace de coordinadora y usa todas las herramientas vistas antes.
+-> No es muy bueno, hay un unico nodo de la red responsable d todo, si se muere mueren todos.
+-> Ademas hay cuello de botella en la capacidad de red y de procesamiento de esa maquina.
+-> Se requiere consultar al coordinador siempre para acceder a cualquier recurso, lo cual enlentece todo.
+-> Cada interaccion con el coordinador requiere mendajes que viajan pior las red, lo cual es lento.
+Alternativas:
+En un entorno distribuido, como se quien pidio primero el acceso a un recurso?
+ -> El que emitio antes el mensjae? Puede ser, pero los mensajes lelgan a distintos puntos de la red en
+    distintos momentos.
+ -> El que logro que sus mensajes llegaran primero al resto?
+ -> Hay un reloj unico, confiable para todas las computadoras?
+ -> Es muy dificil coordinar los clocks de todas las computadoras.
+
+ ----> LAMPORT: No hace falta coordinar relojes., importa el orden entre los eventos.
+
+ Disclaimer:
+    Lamport: latex y trabajo en problemas de sistemas distribuidos y PLA+ (para verificar protocolos distribuidos).
+
+ Lamport propuso definir un orden parcial no reflexivo entre los eventos.
+  ->Si dentro de un proceso, A sucede antes que B.
+  -> Si E es el envio de un mensjae y R su recepcion, E -> R. Aunque E y R sucedan en procesos distintos.
+  -> Si no vale A -> B, ni B -> A entonces A y B son concurrentes.
+
+ En la practica: Cada procesador tieneu un reloj (puede ser real o no, alcanza con que se tenga un valor que se incremente con cada lectura).
+                 Cuando envio un mensaje, este lleva adosado la lectura del reloj.
+                 Como la recepcion siempre es posterior al envio, cuando se recibe un mensaje con la marca de tiempo t que es mayor al valor actual del reloj, se actualiza el reloj interno a t + 1.
+                 Esto da un orden parcial entre los eventos, si tengo un empate desempato arbitrariamente, por ejemplo usando el pid.
+
+                 Ahora, salvo empates, puedo saber en que momento suceden los eventos.
+
+ No tengo forma de estbalecer acuerdos entre procesos con perdida de paquetes.
+
+ *Si la red no funciona:
+ Si tengo fallas en la comuniccion, no existe algoritmo para resolver el concenso.
+
+ *Si los procesos se caen:
+ Si fallan a lo sumo k < n procesos, entonces se puede resolver el consenso con O(( k + 1 )* n²) mensajes.
+
+ CLUSTERS
+    Cosas distintas en distintos ambitos.
+    Un conjunto de computadoras conectadas por una red de alta velocidad, con un scheduler de trabajos comun.
+
+ GRIDS
+    Conjunto de Clusters, cada uno bajo dominio administrativo distinto.
+
+  CLOUD
+    Cluster donde uno puede alquilar una capacidad fija o bajo demanda.
+
+SCHEDULING EN SISTEMAS DISTRIBUIDOS:
+    Dos niveles: Local, dar el procesador un proceso ready.         (affinity)
+                 Global, compartir la carga entre los procesadores. (migration)
+
+
+
+
+
+
+
+
+
+
+
+
