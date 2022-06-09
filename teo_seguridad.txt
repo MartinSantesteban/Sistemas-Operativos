@@ -10,6 +10,42 @@ Los sistemas de seguridad tienen:
     -> Grupos: Colecciones de usuarios
 
 Tristezas de un doble A+1: //Entra en el final
-    -> Authenication, Authorization,
-    ->
+
+//////////////// SE ME CORTA TODO //////////////////////////
+
+Algoritmos de encriptacion simetricos: Usan clave privada y publica.
+
+El Metodo RSA:
+    -> Clave publica y clave privada
+    -> La calve publica se difunde y la privada se cuida.
+    -> Uso el teorema chino del resto para encriptar y desencriptar.
+    -> Calve publica para encriptar, clave privada para desencriptar
+    -> Factorizar y descifrar la calve privada es O(NP)
+    -> Desecnriptar y encriptar es facil computacionealmente
+
+Autotenticacion: 
+    -> Tablas de hash
+    -> Firma digital: > Calculo un hash del documento -> El documento se transformo en una clave de 256 bits
+                      > Encripto este hash con mi clave privada
+                      > Esto es lo que devuelvo
+                      > Esta es la firma digital del documento
+                      > Si alguien quiere verificar que el documento es mio, con la clave publica desencriptan el hash. Por su lado, calculan el hash del documento.
+                      > (Ninguna otra persona puede hacer un hash que se desencripte con tu clave publica ;; lo que se encripta es el hash del documento)
+    -> Token 
+    -> Existe un ataque llamado replay-attack
+                      > Las funciones de hash no lo impiden
+                      > Imaginate que para entrar el sistema te pide mandar la contraseña
+                      > Alguien ataja la contraseña
+                      > Hacemos que el sistema mande el hash asociado a la contrasñea
+                      > El atacante la ataja
+                      > El sistema espera ese mismo hash -> Puedo entrar.
+                      
+                      
+Seguridad en el software:
+    Arquitectura/diseño:
+        > Errores de diseño:     
+                        * Error comun: Hacer suposicioens sobre el ambiente del programa
+                        * 
+                        
+    
 
