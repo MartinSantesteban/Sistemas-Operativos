@@ -1,0 +1,15 @@
+TEORICA: SEGURIDAD INFORMATICA
+
+Los sistemas de seguridad tienen:
+    -> Sujetos ;; Objetos ;; Acciones
+    -> "Un proceso quiere abrir un pipe" "Un thread quiere abrir un lock"
+    -> La idea es definir que sujetos pueden realizar que acciones sobre que objetos.
+    -> Los roles de suketo y objeto no son excluyentes.
+    -> La abstraccion mas comun es la de usuario
+    -> Un usuario es un sujeto del SO que puede ejecutar acciones y a veces es dueño de cosas: Archivos/Procesos/Memoria/Conexiones/Puertos
+    -> Grupos: Colecciones de usuarios
+
+Tristezas de un doble A+1: //Entra en el final
+    -> Authenication, Authorization,
+    ->
+
