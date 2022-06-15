@@ -1,0 +1,77 @@
+TEORICA: ALGROITMOS RELACIONADOS CON LOS SISTEMAS DISTRIBUIDOS
+
+MODELO DE FALLAS
+  - Nadie falla: Te aseguro que el resultado es correcto si no hay fallas
+  - Los procesos caen pero no levantan
+  - Caen pero se pueden levantar
+  - La red se particiona
+  - Los procesos se pueden comportar de manera impredecible
+
+Cada una de ellas induce algoritmos distintos
+
+METRICAS DE COMPLEJIDAD
+  - La metrica que suele tener mucho sentido es la cantidad de mensajes que se encian a traves de la red
+  - Otra metrica: que tipos de fallas soportan, o cuanta informacion necesitan.
+
+(en esta clase proceso == nodo == procesadores)
+
+Protocolos para asegurar exclusion mutua distribuida
+  - Token passing: * Los procesos conforman un anillo logico entre ellos.
+                   * Cada vez que recibo un token, se lo paso al siguiente, salvo que yo quiera entrar a la seccion critica. Ahi lo retengo yo hasta que salga
+                   * Al ser un anillo a todos les toca en algun momento el token -> No hay inanicion
+                   * Dependiendo de la natrualeza del problema, puedo necesitar mas de un token circulando.
+                   * Desventajas: > Si se cae un nodo, se corta el anillo, y no puedo seguir pasando el token <- Nivel de resistencia: 0
+                                  > Hace que circulen mensajes aun cuando nadie quiere entrar a la seccion critica.
+
+  - Solicitudes: * Cuando un proceso quiere entrar a la seccion critica, le envio a todos una Solicitud(P_I,timestamp)
+                 * Cada proceso responde o encola la respuesta
+                 * Solo puedo entrar cuando recibi todas las respuestas
+                 * Si entro a la seccion critiva, respondo todas las solicitudes que hayan llegado cuando salgo.
+                 * Respondo inmediatamente si: > No me interesa entrar a la seccion critica
+                                               > Quiero entrar, aun no lo hice y el ts que recibo es menor que el mio, por lo que tiene prioridad sobre mi
+                 * Este algoritmo requiere que todos conozcan la existencia de todos
+                 * Necesito una forma de tener timestamps -> Solucion de Lamport == El tiempo real no importa, solo me interesa el orden
+                 * A favor: No se generan interrpuciones innecesarias
+                 * En contra: Si uno se cae, no puede responder -> Se traban todos
+                 * Son 2n mensajes si todos los nodos solicitan.
+                 * Si todos los mensajes estan constantemente solicitando, entonces es poco eficiente.
+
+  - Locks distribuidos (protocolo de mayoria):
+                 * Quiero obtener un lock de un objeto del cual hay n copias en distintos lugares de la red.
+                 * Para obtener un lock, debemos peedirlo a por lo menos n/2 + 1 sitios. <- Se lo pido a todos, solo espero la respuesta de n/2 + 1
+                 * Cada sitio responde si puede o no darselo <- Hay n objetos del lock en n sitios
+                 * Cada copia del objeto tiene un numero de version. SI lo escribimos, tomamos el mas alto y lo incrementamos en uno.
+                 * Cuando la mitad + 1 me da el ok -> Agarro el de version mas alto (de los que me dieron el ok). SI el max es 8, lo actualizo y le pongo 9
+                 * Temor: Que ya exista una version mejor entre los que no me dieron el ok
+                 * No se pueden otorgar permisos de locks a la vez.
+                 * Se podria lee una copia desactualizada? -> No puede pasar. Ver demostracion (si le pido a la mitad la ultima version, y la sobreescribo al max, la proxima vez que se trate de leer se va a pedir el max a la mtad + 1, si habia actualizado la mitad +1, lo voy a leer si o si)
+                 * Problema, si los que me dan el ok se caen despues de darlo y antes de hacer la copia, cuando yo copie la nueva version, en los caidos no se copia. -> Luego de actualizar, menos de la mitad + 1 tiene la version nueva. Esto lleva a errores, pq menos de la mitad tienen el valor de verdad
+
+   - Eleccion de lider:
+                 * Una serie de procesos debe elegir a uno como lider para algun tipo de tarea.
+                 * Cada nodo mantiene un flag status: Soy o no el lider
+                 * Inicialmente nadie es el lider, y estamos usando un anillo logico
+                 * Hago circular mi ID cuando queiro disparar una eleccion de lider
+                 * Cuando recibo un mensaje comparo ID que circula con el mido. Hago circular el mayor
+                 * Cuando da toda la vuelta sabemos quien es el lider
+                 * Ponemos a girar un mensaje de notificacion para que todos los sepan
+                 * El protocolo presupone que cada proceso tiene un ID predefinido
+                 * El lider cambia cuando el lider anterior se cae, o si cambian los IDs por x razon.
+                 * Cada cuanto se lanza la eleccion de lider lo define el contexto del problema, no lo define el protocolo
+                 * Si se cae el anillo hay que ver de reconstruirlo antes de volver a pedir eleccion de lider
+
+Problema: Instantanea global consistente
+    - Supongamos que tengo un estado E = Sigma E_i siendo E_i la parte del estado que le corresponde a P_i
+    - Lo unico que cambia los estados son mensajes entre procesos y no eventos externos
+    - Cuando se quiee una instantanera, un proceso se envia a si mismo un mensaje de marca
+    - Cuando P_i recibe un mensaje de marca por primera vez, guarda una copia c_i de E_i y envia un mensaje de marca a todos los otros procesos.
+    - En ese momento, P_i empieza a registrar todos los mensajes que recibe cada vecino P_j hasta que recibe marca de todos ellos.
+    - En ese momento queda conformada la secuencia de recibidios de todos los mensajes que recibio P_i de P-J antes de que éste tomara la instantanea.
+
+Two Phase Commit:
+    - "Acuerdo de dos etapas"
+    - Asegurarse que un dato persiste en todas las copias
+    - La idea es realizar una transaccion de manera atomica, todos debemos estar de acuerdo en que se hizo o no se hizo
+    - EN la primer fase le preguntamos a todos si estan de acuerdo con que se haga la transaccion
+    - Si dice no, abort. Si dice si, anotamos a los que dijieron que si. SI luego de un tiempo no recibi todos los si, aborto. Si recibo todos los si avisamos a todos que quedo confirmada y empieza la segunda fase.
+    - La fase 2 es enviar la transaccion

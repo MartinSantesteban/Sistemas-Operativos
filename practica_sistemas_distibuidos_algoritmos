@@ -1,0 +1,10 @@
+CLASE PRACTICA ALGORITMOS DE SISTEMAS DISTRIBUIDOS
+
+Sistema distribuido == Muchas computadoras corriendo en paralelo
+  - no comparten clocks
+  - PRO: Paralelismo, replicacion, descentralizacion
+  - CONTRA: Dificultad para la sincronizacion y para mantener coherencia, informacion parcial
+
+EJERCICIO 1
+  -> LEER ENUNCIADO
+  
